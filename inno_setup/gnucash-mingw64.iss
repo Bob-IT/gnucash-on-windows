@@ -107,6 +107,7 @@ Source: "@INST_DIR@\share\doc\@PACKAGE@\AUTHORS"; DestDir: "{app}\doc\@PACKAGE@"
 Source: "@INST_DIR@\share\doc\@PACKAGE@\ChangeLog"; DestDir: "{app}\doc\@PACKAGE@"; Components: main
 Source: "@INST_DIR@\share\doc\@PACKAGE@-docs\*.chm"; DestDir: "{app}\share\@PACKAGE@\help"; Flags: recursesubdirs; Components: main
 Source: "@INST_DIR@\share\doc\@PACKAGE@-docs\*.hhmap"; DestDir: "{app}\share\@PACKAGE@\help"; Flags: recursesubdirs; Components: main
+Source: "@INST_DIR@\share\doc\@PACKAGE@\gtk-3.0.css"; DestDir: "{app}\doc\@PACKAGE@"; Flags: ignoreversion; Components: main
 
 ;;;; The second section retrieves the dependencies that we need from MinGW.
 ;; Required DLLs
@@ -133,6 +134,7 @@ Source: "@MINGW_DIR@\bin\libcairo-gobject-2.dll"; DestDir: "{app}\bin"; Componen
 Source: "@MINGW_DIR@\bin\libcurl-4.dll"; DestDir: "{app}\bin"; Components: main
 Source: "@MINGW_DIR@\bin\libcrypto-3.dll"; DestDir: "{app}\bin"; Components: main
 Source: "@MINGW_DIR@\bin\libdatrie-1.dll"; DestDir: "{app}\bin"; Components: main
+Source: "@MINGW_DIR@\bin\libdeflate.dll"; DestDir: "{app}\bin"; Components: main
 Source: "@MINGW_DIR@\bin\libepoxy-0.dll"; DestDir: "{app}\bin"; Components: main
 Source: "@MINGW_DIR@\bin\libexpat-1.dll"; DestDir: "{app}\bin"; Components: main
 Source: "@MINGW_DIR@\bin\libffi-8.dll"; DestDir: "{app}\bin"; Components: main
@@ -162,6 +164,9 @@ Source: "@MINGW_DIR@\bin\libidn2-0.dll"; DestDir: "{app}\bin"; Components: main
 Source: "@MINGW_DIR@\bin\libintl-8.dll"; DestDir: "{app}\bin"; Components: main
 Source: "@MINGW_DIR@\bin\libjavascriptcoregtk-3.0-0.dll"; DestDir: "{app}\bin"; Components: main
 Source: "@MINGW_DIR@\bin\libjpeg-8.dll"; DestDir: "{app}\bin"; Components: main
+Source: "@MINGW_DIR@\bin\libjbig-0.dll"; DestDir: "{app}\bin"; Components: main
+Source: "@MINGW_DIR@\bin\libtiff-6.dll"; DestDir: "{app}\bin"; Components: main
+Source: "@MINGW_DIR@\bin\libLerc.dll"; DestDir: "{app}\bin"; Components: main
 Source: "@MINGW_DIR@\bin\libltdl-7.dll"; DestDir: "{app}\bin"; Components: main
 Source: "@MINGW_DIR@\bin\liblzma-5.dll"; DestDir: "{app}\bin"; Components: main
 Source: "@MINGW_DIR@\bin\libnettle-8.dll"; DestDir: "{app}\bin"; Components: main
