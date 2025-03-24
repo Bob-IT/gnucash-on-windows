@@ -1,0 +1,12 @@
+diff --git a/tools/gcttool/main.c b/tools/gcttool/main.c
+--- a/tools/gcttool/main.c
++++ b/tools/gcttool/main.c
+@@ -179,7 +179,7 @@
+   /* for conversion purposes */
+   SSL_load_error_strings();
+   SSL_library_init();
+-  GWEN_Gui_SetKeyDataFromTextOpenSslFn(gui, getKeyDataFromTextOpenSSL);
++  GWEN_Gui_SetKeyDataFromTextOpenSslFn(gui,(GWEN_GUI_KEYDATAFROMTEXT_OPENSSL_FN)getKeyDataFromTextOpenSSL);
+ #endif
+ 
+   GWEN_Logger_Open(GCT_LOGDOMAIN, "gct-tool", 0,

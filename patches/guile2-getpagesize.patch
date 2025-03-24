@@ -1,0 +1,47 @@
+diff --git a/libguile/loader.c b/libguile/loader.c
+--- a/libguile/loader.c
++++ b/libguile/loader.c
+@@ -24,6 +24,11 @@
+ #include <string.h>
+ #include <fcntl.h>
+ #include <unistd.h>
++
++#ifdef __MINGW32__
++/* Windows has a fixed page size of 64MB */
++#define getpagesize() 65536
++#endif
+ 
+ #ifdef HAVE_SYS_MMAN_H
+ #include <sys/mman.h>
+
+diff --git a/libguile/socket.c b/libguile/socket.c
+--- a/libguile/socket.c
++++ b/libguile/socket.c
+@@ -48,6 +48,11 @@
+ #endif
+ #include <netdb.h>
+ #include <arpa/inet.h>
++
++#ifdef __MINGW32__
++/* Windows has a fixed page size of 64MB */
++#define getpagesize() 65536
++#endif
+ 
+ #include <gmp.h>
+
+diff --git a/libguile/vm.c b/libguile/vm.c
+--- a/libguile/vm.c
++++ b/libguile/vm.c
+@@ -29,6 +29,11 @@
+ 
+ #ifdef HAVE_SYS_MMAN_H
+ #include <sys/mman.h>
++#endif
++
++#ifdef __MINGW32__
++/* Windows has a fixed page size of 64MB */
++#define getpagesize() 65536
+ #endif
+ 
+ #include "libguile/bdw-gc.h"
+

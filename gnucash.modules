@@ -101,7 +101,9 @@
 
   <autotools id="bdw-gc" autogen-template="/bin/bash -c 'pushd %(srcdir)s &amp;&amp; ./autogen.sh &amp;&amp; automake -ac &amp;&amp; popd &amp;&amp; %(srcdir)s/configure --prefix %(prefix)s  %(autogenargs)s'"
 	     autogenargs="--enable-threads=no --disable-parallel-mark --enable-shared --disable-static">
-    <branch repo="github" module="ivmai/bdwgc"  revision="gc7_6_0" />
+    <branch repo="github" module="ivmai/bdwgc"  revision="gc7_6_0">
+		<patch file="bdw-gc-mark.patch" strip="1"/>
+    </branch>
     <dependencies>
       <dep package="libatomic-ops"/>
     </dependencies>
@@ -110,6 +112,7 @@
   <autotools id="guile2" autogen-sh="autoreconf" autogenargs="--disable-rpath --enable-networking --enable-nls --enable-posix --enable-regex --with-threads=no --with-modules --disable-static">
     <branch repo="sourceforge" module="gnucash/Dependencies/guile-2.2.7.3-5ef31.tar.xz"
 	    version=" 2.2.7.3-5ef31">
+		<patch file="guile2-getpagesize.patch" strip="1"/>
     </branch>
     <dependencies>
       <dep package="gmp"/>
@@ -133,6 +136,7 @@
              autogenargs="--with-guis='gtk3' --enable-local-install --disable-binreloc PKG_CONFIG='pkg-config --dont-define-prefix'">
     <branch module="529/gwenhywfar-5.12.0.tar.gz" version="5.12.0"
             repo="aqbanking">
+		<patch file="gwenhywfar-main.patch" strip="1"/>
     </branch>
     <dependencies>
       <dep package="gcrypt"/>
@@ -183,7 +187,7 @@
      and rerun build and it will work OK. -->
   <autotools id="OpenSP"
 	     autogenargs="--disable-static --enable-shared --disable-doc-build --disable-nls"
-	     autogen-template='/bin/bash -c "pushd %(srcdir)s &amp;&amp; ./autoinit.sh &amp;&amp; popd &amp;&amp; %(srcdir)s/configure --prefix %(prefix)s  %(autogenargs)s"'>
+	     autogen-template='/bin/bash -c "pushd %(srcdir)s &amp;&amp; autoreconf -fiv &amp;&amp; popd &amp;&amp; %(srcdir)s/configure --prefix %(prefix)s  %(autogenargs)s"'>
     <branch repo="sourceforge" module="openjade/OpenSP-1.5.2.tar.gz"
 	    version='1.5.2'>
       <patch file="opensp-1.5.2.patch" strip='1'/>
@@ -325,6 +329,20 @@
     <dependencies>
       <dep package="gnucash-unstable"/>
       <dep package="gnucash-unstable-docs"/>
+    </dependencies>
+  </metamodule>
+
+  <metamodule id="meta-gnucash-base">
+    <dependencies>
+      <dep package="libofx"/>
+      <dep package="aqbanking"/>
+      <dep package="libdbi-drivers"/>
+      <!--dep package="shared-mime-info"/-->
+      <!--dep package="iso-codes"/-->
+      <dep package="guile2"/>
+      <!--dep package="swig"/-->
+      <dep package="boost"/>
+      <dep package="googletest"/>
     </dependencies>
   </metamodule>
 

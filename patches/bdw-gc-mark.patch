@@ -1,0 +1,17 @@
+diff --git a/mark.c b/mark.c
+--- a/mark.c
++++ b/mark.c
+@@ -509,11 +509,11 @@ static void alloc_mark_stack(size_t);
+       /* Win32.                                                  */
+ 
+       ext_ex_regn er;
+ 
+       er.alt_path = &&handle_ex;
+-      er.ex_reg.handler = mark_ex_handler;
++      er.ex_reg.handler = (PEXCEPTION_ROUTINE)mark_ex_handler;
+       __asm__ __volatile__ ("movl %%fs:0, %0" : "=r" (er.ex_reg.prev));
+       __asm__ __volatile__ ("movl %0, %%fs:0" : : "r" (&er));
+       ret_val = GC_mark_some_inner(cold_gc_frame);
+       /* Prevent GCC from considering the following code unreachable */
+       /* and thus eliminating it.                                    */
+
