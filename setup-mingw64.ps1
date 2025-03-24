@@ -121,7 +121,6 @@ function Install-Package([string]$url, [string]$install_dir,
     $proc.waitForExit()
 }
 
-
 function bash-command() {
     param ([string]$command = "")
     if (!(test-path -path $bash_path)) {
@@ -190,8 +189,8 @@ if ($PSBoundParameters.ContainsKey('preferred_mirror')) {
 }
 
 # Install Html Help Workshop
-
 $html_help_workshop_url =  "http://download.microsoft.com/download/0/a/9/0a939ef6-e31c-430f-a3df-dfae7960d564/htmlhelp.exe"
+#$html_help_workshop_url =  "https://web.archive.org/web/20160201063255/http://download.microsoft.com/download/0/A/9/0A939EF6-E31C-430F-A3DF-DFAE7960D564/htmlhelp.exe"
 $html_help_workshop_installer = "htmlhelp.exe"
 
 $installed_hh = get-item -path "hkcu:\SOFTWARE\Microsoft\HTML Help Workshop" | foreach-object{$_.GetValue("InstallDir")}
@@ -206,7 +205,6 @@ if (!(test-path -path $hhctrl_ocx)) {
 }
 $hhctrl_ocx = make-unixpath -path $hhctrl_ocx
 
-
 # Install Inno Setup
 if (!(test-path -path ${env:ProgramFiles(x86)}\inno)) {
     $inno_setup_url = "http://files.jrsoftware.org/is/5/innosetup-5.5.9-unicode.exe"
@@ -218,6 +216,7 @@ if (!(test-path -path ${env:ProgramFiles(x86)}\inno)) {
 #if MSys2 isn't already installed, install it.
 if (!(test-path -path $bash_path)) {
    Write-Host @"
+
 Updating the new installation. A bash window will open. In that window accept the proposed installation and close the window when the update completes.
 
 There will be a second update.
@@ -236,10 +235,9 @@ bash-command -command "pacman -Syyuu --noconfirm"
 
 # Set up aliases for the parts of msys-devtools and mingw-w64-toolchain that
 # we need:
-$devel = "asciidoc autoconf autoconf2.13 autogen automake-wrapper bison diffstat diffutils dos2unix file flex gawk gettext gettext-devel gperf grep groff intltool libtool m4 make man-db pacman pactoys-git patch patchutils perl pkg-config python rsync sed texinfo texinfo-tex wget xmlto git texinfo"
+$devel = "asciidoc autoconf autoconf2.13 autogen automake-wrapper bison diffstat diffutils dos2unix file flex gawk gettext gettext-devel gperf grep groff intltool libtool m4 make man-db pacman pactoys-git patch patchutils perl pkgconf python python-setuptools rsync sed texinfo texinfo-tex wget xmlto git texinfo"
 
-$toolchain = "binutils cmake crt-git gcc gcc-libs gdb headers-git libmangle-git libtool libwinpthread-git make pkg-config swig tools-git winpthreads-git"
-
+$toolchain = "binutils cmake crt-git gcc gcc-libs gdb headers-git libmangle-git libtool libwinpthread-git make swig tools-git winpthreads-git"
 
 # Install the system and toolchain:
 $msys_devel = make-pkgnames -prefix "msys/" -items $devel
@@ -247,9 +245,31 @@ bash-command -command "pacman -S $msys_devel --noconfirm --needed"
 $mingw_toolchain = make-pkgnames -prefix $mingw_prefix -items $toolchain
 bash-command -command "pacman -S $mingw_toolchain --noconfirm --needed"
 
+# We need some old packages from the mysys2 archive
+Write-Host @"
+
+Now we'll get some old apckages from the msys2 archive.
+"@
+$msys2_archive = "https://repo.msys2.org/mingw/mingw32/"
+$libmariad = "mingw-w64-i686-libmariadbclient-3.1.13-1-any.pkg.tar.zst"
+$libpostgres = "mingw-w64-i686-postgresql-16.1-1-any.pkg.tar.zst"
+$libxmlsec = "mingw-w64-i686-xmlsec-1.2.39-1-any.pkg.tar.zst"
+$libsoup = "mingw-w64-i686-libsoup-2.74.3-1-any.pkg.tar.zst"
+
+$libmariad_url = $msys2_archive + $libmariad
+$linpostgres_url = $msys2_archive + $libpostgres
+$libxmlsec_url = $msys2_archive + $libxmlsec
+$libsoup_url = $msys2_archive + $libsoup
+
+bash-command -command "pacman -U $libmariad_url --noconfirm --needed"
+bash-command -command "pacman -U $linpostgres_url --noconfirm --needed"
+bash-command -command "pacman -U $libxmlsec_url --noconfirm --needed"
+bash-command -command "pacman -U $libsoup_url --noconfirm --needed"
+
 # The mingw-w64-webkitgtk3 package is no longer supported by the msys2
 # project so we have our own build on SourceForge.
 Write-Host @"
+
 Now we'll install a pre-built webkitgtk3 package we've created and placed in the GnuCash project on SourceForge. It will install several more dependencies from Mingw-w64's repository.
 "@
 $sourceforge_url = "https://downloads.sourceforge.net/gnucash/Dependencies/"
@@ -258,17 +278,46 @@ $key_url = $sourceforge_url + $signing_keyfile
 $key_id = "C1F4DE993CF5835F"
 $webkit = "$arch_long-webkitgtk3-2.4.11-999.51-any.pkg.tar.zst"
 $webkit_url = $sourceforge_url + $webkit
+$webkit_sig_url = $sourceforge_url + $webkit + ".sig"
+$webkit_pkg = "/var/cache/pacman/pkg/" + $webkit
 bash-command -command "wget $key_url -O $signing_keyfile"
+
+Write-Host @"
+
+Updating trust database may get stuck, Ctrl-C and rerun setup-mingw64.ps1
+"@
+
 bash-command -command "pacman-key --add $signing_keyfile"
 bash-command -command "pacman-key --lsign $key_id"
-bash-command -command "pacman -U $webkit_url --noconfirm --needed"
+# Fix download error for sig file, Maximum file size exceeded
+if(![System.IO.File]::Exists($(join-path $msys2_root/var/cache/pacman/pkg/  $webkit)))
+{
+    bash-command -command "wget -P  /var/cache/pacman/pkg $webkit_sig_url"
+    bash-command -command "wget -P  /var/cache/pacman/pkg $webkit_url"
+}
+bash-command -command "pacman -U $webkit_pkg --noconfirm --needed"
 
-$ignorefile = ""
-[IO.File]::WriteAllLines( "$msys2_root\etc\pacman.d\gnucash-ignores.pacman", $ignorefile)
-bash-command -command "perl -ibak -pe 'BEGIN{undef $/;} s#[[]options[]]\R(Include = [^\R]*\R)?#[options]\nInclude = /etc/pacman.d/gnucash-ignores.pacman\n#smg' /etc/pacman.conf"
+# Downgrade packages for webkit
+Write-Host @"
+
+Downgrade some packages to match required webkit version.
+"@
+
+$libboost = "mingw-w64-i686-boost-1.84.0-1-any.pkg.tar.zst"
+$libicu = "mingw-w64-i686-icu-74.2-1-any.pkg.tar.zst"
+$libharfbuzz = "mingw-w64-i686-harfbuzz-8.4.0-1-any.pkg.tar.zst"
+
+$libboost_url = $msys2_archive + $libboost
+$libicu_url = $msys2_archive + $libicu
+$libharfbuzz_url = $msys2_archive + $libharfbuzz
+
+bash-command -command "pacman -U $libboost_url --noconfirm --needed"
+bash-command -command "pacman -U $libicu_url --noconfirm --needed"
+bash-command -command "pacman -U $libharfbuzz_url --noconfirm --needed"
 
 # Install the remaining dependencies.
-$deps = "boost icu gtk3 iso-codes shared-mime-info libmariadbclient libsoup libunistring libwebp postgresql ninja pdcurses sqlite3 docbook-xsl"
+#$deps = "boost icu gtk3 iso-codes libsecret shared-mime-info libsoup libunistring libwebp ninja pdcurses sqlite3 docbook-xsl"
+$deps = "iso-codes libsecret pdcurses"
 
 Write-Host @"
 
@@ -277,6 +326,21 @@ Now we'll install the dependencies. Accept the installation as usual. About half
 
 $mingw_deps = make-pkgnames -prefix $mingw_prefix -items $deps
 bash-command -command "pacman -S $mingw_deps --noconfirm --needed"
+
+# Create Ignore file
+Write-Host @"
+
+Create the Ignore Package file.
+"@
+
+$ignorefile = "IgnorePkg = mingw-w64-i686-boost
+IgnorePkg = mingw-w64-i686-icu
+IgnorePkg = mingw-w64-i686-harfbuzz"
+if(![System.IO.File]::Exists("$msys2_root\etc\pacman.d\gnucash-ignores.pacman"))
+{
+    [IO.File]::WriteAllLines( "$msys2_root\etc\pacman.d\gnucash-ignores.pacman", $ignorefile)
+    bash-command -command "perl -ibak -pe 'BEGIN{undef $/;} s#[[]options[]]\R(Include = [^\R]*\R)?#[options]\nInclude = /etc/pacman.d/gnucash-ignores.pacman\n#smg' /etc/pacman.conf"
+}
 
 $target_unix = make-unixpath $target_dir
 $download_unix = make-unixpath $download_dir
@@ -308,6 +372,7 @@ There was an error installing HTML Help Workshop. This will prevent building the
 	Write-Host "HTML Help Workshop isn't correctly installed."
     }
 }
+
 Write-Host @"
 
 Clone the gnucash-on-windows repository into the target source directory, patch jhbuild to disable its DESTDIR dance and set up jhbuildrc with our prefixes.
